@@ -27,6 +27,13 @@ function getDb(): Database.Database {
     _db.pragma('journal_mode = WAL');
     // Enforce foreign-key constraints
     _db.pragma('foreign_keys = ON');
+    // Auto-initialize schema on first open — idempotent (all IF NOT EXISTS)
+    // More reliable than instrumentation.ts which can be skipped by Next.js
+    const schemaPath = path.join(process.cwd(), 'sql', 'schema.sql');
+    if (fs.existsSync(schemaPath)) {
+      const sql = fs.readFileSync(schemaPath, 'utf-8');
+      _db.exec(sql);
+    }
   }
   return _db;
 }
