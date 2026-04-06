@@ -16,10 +16,10 @@ export default async function ArchivePage() {
   const sessions = await query<SessionListItem>(
     `SELECT
        s.id, s.title, s.dilemma, s.ruling, s.status, s.created_at,
-       COUNT(ct.id)::int AS turn_count
+       CAST(COUNT(ct.id) AS INTEGER) AS turn_count
      FROM sessions s
      LEFT JOIN council_turns ct ON ct.session_id = s.id
-     WHERE s.user_id = $1
+     WHERE s.user_id = ?
      GROUP BY s.id
      ORDER BY s.created_at DESC`,
     [user.id]
