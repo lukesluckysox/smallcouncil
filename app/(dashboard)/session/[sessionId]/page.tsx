@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/session';
 import { queryOne, query } from '@/lib/db';
@@ -20,6 +21,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function formatDate(date: Date | string): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default async function SessionPage({ params }: Props) {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
@@ -38,12 +48,36 @@ export default async function SessionPage({ params }: Props) {
 
   return (
     <div className={`page-container ${styles.page}`}>
+      {/* Breadcrumb / back nav */}
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <Link href="/archive" className={styles.backLink}>
+          ← Archive
+        </Link>
+        <span className={styles.breadcrumbSep}>·</span>
+        <Link href="/dashboard" className={styles.backLink}>
+          Chamber
+        </Link>
+      </nav>
+
       {/* Session header */}
       <div className={styles.sessionHeader}>
-        <p className={`${styles.label} font-display`}>Council Session</p>
+        <div className={styles.sessionMeta}>
+          <p className={`${styles.label} font-display`}>Council Session</p>
+          <span className={styles.sessionDate}>{formatDate(session.created_at)}</span>
+        </div>
+
         {session.title && (
           <h1 className={`${styles.sessionTitle} font-display`}>{session.title}</h1>
         )}
+
+        {/* Ruling indicator if one exists */}
+        {session.ruling && (
+          <div className={styles.rulingIndicator}>
+            <span className={`${styles.rulingIndicatorDot}`} />
+            <span className={`${styles.rulingIndicatorText} font-display`}>Ruling recorded</span>
+          </div>
+        )}
+
         <div className={styles.dilemmaBlock}>
           <p className={`${styles.dilemmaLabel} font-display`}>The Dilemma</p>
           <blockquote className={`${styles.dilemmaText} font-dramatic`}>

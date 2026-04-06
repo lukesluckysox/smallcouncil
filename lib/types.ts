@@ -88,6 +88,7 @@ export interface SessionListItem {
   id: string;
   title: string | null;
   dilemma: string;
+  ruling: string | null;
   status: string;
   created_at: Date;
   turn_count: number;

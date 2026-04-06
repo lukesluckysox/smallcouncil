@@ -23,6 +23,7 @@
   color: var(--text-accent);
   text-transform: uppercase;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav {
@@ -55,12 +56,13 @@
   align-items: center;
   gap: 16px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .userEmail {
   font-size: 0.78rem;
   color: var(--text-muted);
-  max-width: 180px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -82,12 +84,70 @@
   border-color: var(--border-mid);
 }
 
+/* ─── Mobile Bottom Nav ──────────────────────────────────────────────────────── */
+
+.mobileNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(14, 13, 11, 0.97);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-subtle);
+  padding: 8px 4px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+.mobileNavLink {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--font-display);
+}
+
+.mobileNavLink:hover {
+  color: var(--text-secondary);
+}
+
+.mobileNavLinkActive {
+  color: var(--text-accent);
+  background: var(--bg-elevated);
+}
+
+.mobileNavLeave {
+  color: var(--text-muted);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
 @media (max-width: 640px) {
   .nav {
     display: none;
   }
 
-  .userEmail {
+  .userArea {
     display: none;
   }
+
+  .mobileNav {
+    display: flex;
+    gap: 2px;
+  }
+
+  /* Add bottom padding to body content so it isn't hidden behind mobile nav */
+  /* Applied via a global selector below; components add pb-mobile class if needed */
 }

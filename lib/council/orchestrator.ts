@@ -186,6 +186,8 @@ async function runRound2(
 }
 
 // ─── Council Summary ──────────────────────────────────────────────────────────
+// Uses a neutral API call — NOT routed through any persona system prompt.
+// This keeps the scribe voice distinct from all five council members.
 
 async function generateSummary(
   client: Anthropic,
@@ -197,28 +199,57 @@ async function generateSummary(
     .map((t) => {
       const meta = PERSONA_META[t.personaId];
       const r2 = round2.find((r) => r.personaId === t.personaId);
-      return `${meta.name}: "${t.stanceTitle}" — ${t.content}${r2 ? `\n[In debate: ${r2.content}]` : ''}`;
+      const challengerMeta = r2 ? PERSONA_META[r2.targetPersonaId] : null;
+      return [
+        `${meta.name} (${meta.archetype}): "${t.stanceTitle}"`,
+        t.content,
+        r2 ? `[In debate, challenged ${challengerMeta?.name}: ${r2.content}]` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
     })
-    .join('\n\n');
+    .join('\n\n---\n\n');
 
-  const summaryPrompt = `You are the council scribe. Your role is to produce a final synthesis document — not as any persona, but as a neutral observer who witnessed the full debate.
+  const NEUTRAL_SYSTEM = `You are the council scribe — a dispassionate recorder who witnessed the full deliberation. You hold no allegiance to any of the five voices. You do not speak as any advisor. You produce clear-eyed synthesis: naming tensions, finding unexpected convergences, and identifying the core tradeoff without resolving it for the person. Your prose is serious, measured, and literary without being florid. Third person, past tense.`;
 
-The dilemma: "${dilemma}"
+  const userPrompt = `The dilemma brought before the council:
 
-The council spoke:
+"${dilemma}"
+
+The full deliberation:
 
 ${councilTranscript}
 
-Write a Council Summary of 200-300 words that:
-1. Names the major tensions the council surfaced (not a list — weave them together)
-2. Notes where the voices found unexpected agreement
-3. Identifies the core tradeoff the person must actually make
-4. Offers a balanced interpretation — not a verdict, but a sharpened frame
+Write the Council Summary — 200-300 words:
+- Weave together the major tensions the debate surfaced (do not list them)
+- Note where voices found unexpected agreement or convergence
+- Name the core tradeoff the person must actually make
+- Offer a sharpened interpretive frame — not a verdict
+- End with one sentence: the essential question the person must sit with
 
-Do not recap what each voice said. Synthesize. Write in third person, past tense ("The council found...", "The debate revealed..."). Keep the tone serious and considered. End with one sentence that poses the essential question the person must sit with.`;
+Do not recap individual stances. Synthesize across the whole record.`;
 
-  const response = await callPersona(client, 'sage', summaryPrompt);
-  return response.content;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const message = await client.messages.create(
+      {
+        model: MODEL,
+        max_tokens: 800,
+        system: NEUTRAL_SYSTEM,
+        messages: [{ role: 'user', content: userPrompt }],
+      },
+      { signal: controller.signal }
+    );
+    const content = message.content[0].type === 'text' ? message.content[0].text : '';
+    return content || 'The council deliberated. The record stands.';
+  } catch (err) {
+    console.error('[Council] Summary generation failed:', err);
+    return 'The council deliberated, but the scribe could not complete the record at this time.';
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ─── Main Orchestrator ────────────────────────────────────────────────────────

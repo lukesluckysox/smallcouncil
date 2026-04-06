@@ -1,27 +1,92 @@
 .page {
-  padding-top: 48px;
+  padding-top: 36px;
   padding-bottom: 80px;
 }
 
+/* ─── Breadcrumb ─────────────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.backLink {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+  color: var(--text-secondary);
+}
+
+.breadcrumbSep {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  opacity: 0.4;
+}
+
+/* ─── Session Header ─────────────────────────────────────────────────────────── */
+
 .sessionHeader {
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.sessionMeta {
+  display: flex;
+  align-items: center;
   gap: 16px;
 }
 
 .label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
+.sessionDate {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 .sessionTitle {
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-size: clamp(1.4rem, 3vw, 2rem);
   letter-spacing: 0.04em;
   color: var(--text-primary);
+  line-height: 1.25;
 }
+
+/* ─── Ruling Indicator ───────────────────────────────────────────────────────── */
+
+.rulingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rulingIndicatorDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px rgba(184, 134, 11, 0.5);
+  flex-shrink: 0;
+}
+
+.rulingIndicatorText {
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+}
+
+/* ─── Dilemma Block ──────────────────────────────────────────────────────────── */
 
 .dilemmaBlock {
   background: var(--bg-elevated);
@@ -32,7 +97,7 @@
 }
 
 .dilemmaLabel {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -46,4 +111,12 @@
   color: var(--text-secondary);
   line-height: 1.7;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .sessionMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }

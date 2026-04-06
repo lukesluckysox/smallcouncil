@@ -34,13 +34,30 @@ export default function VoiceCard({ turn, round = 1 }: Props) {
           {round === 1 && turn.confidence != null && (
             <ConfidenceMeter value={turn.confidence} />
           )}
-          {round === 2 && targetMeta && (
-            <span className={styles.challengingBadge}>
-              Challenges {targetMeta.name}
-            </span>
-          )}
         </div>
       </div>
+
+      {/* Round 2: Challenge banner */}
+      {round === 2 && targetMeta && (
+        <div
+          className={styles.challengeBanner}
+          style={{
+            '--target-color': targetMeta.accentColor,
+            '--target-bg': `${targetMeta.color}22`,
+          } as React.CSSProperties}
+        >
+          <span className={`${styles.challengeFrom} font-display`}>
+            {meta.name}
+          </span>
+          <span className={styles.challengeArrow}>challenges</span>
+          <span
+            className={`${styles.challengeTo} font-display`}
+            style={{ color: targetMeta.accentColor }}
+          >
+            {targetMeta.name}
+          </span>
+        </div>
+      )}
 
       {/* Stance title (Round 1) */}
       {round === 1 && turn.stance_title && (
@@ -52,7 +69,7 @@ export default function VoiceCard({ turn, round = 1 }: Props) {
       {/* Main content */}
       <div className={`${styles.content} prose`}>
         {turn.content.split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
+          <p key={i}>{para.replace(/^\n+/, '')}</p>
         ))}
       </div>
 

@@ -17,6 +17,7 @@ export async function GET() {
          s.id,
          s.title,
          s.dilemma,
+         s.ruling,
          s.status,
          s.created_at,
          COUNT(ct.id)::int AS turn_count

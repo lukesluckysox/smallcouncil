@@ -315,3 +315,10 @@ textarea::placeholder, input::placeholder {
 @media (max-width: 480px) {
   html { font-size: 14px; }
 }
+
+/* Mobile bottom nav clearance — applied to all authenticated pages */
+@media (max-width: 640px) {
+  main {
+    padding-bottom: 80px;
+  }
+}

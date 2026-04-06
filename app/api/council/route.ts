@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireUser } from '@/lib/auth/session';
 import { runCouncil } from '@/lib/council/orchestrator';
 import { query } from '@/lib/db';
-import type { CouncilResult, PersonaId } from '@/lib/types';
+import type { CouncilResult } from '@/lib/types';
 
 const dilemmaSchema = z.object({
   dilemma: z
