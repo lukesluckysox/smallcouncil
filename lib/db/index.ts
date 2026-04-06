@@ -98,13 +98,27 @@ function getDb(): Database.Database {
 
 export async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return getDb().prepare(sql).all(...(params as any[])) as T[];
+  const stmt = getDb().prepare(sql);
+  if (stmt.reader) {
+    // SELECT or INSERT/UPDATE ... RETURNING * — returns rows
+    return stmt.all(...(params as any[])) as T[];
+  } else {
+    // INSERT / UPDATE / DELETE — .all() throws; use .run() instead
+    stmt.run(...(params as any[]));
+    return [];
+  }
 }
 
 export async function queryOne<T>(sql: string, params: unknown[] = []): Promise<T | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = getDb().prepare(sql).all(...(params as any[])) as T[];
-  return rows[0] ?? null;
+  const stmt = getDb().prepare(sql);
+  if (stmt.reader) {
+    const rows = stmt.all(...(params as any[])) as T[];
+    return rows[0] ?? null;
+  } else {
+    stmt.run(...(params as any[]));
+    return null;
+  }
 }
 
 export function getDbInstance(): Database.Database {
