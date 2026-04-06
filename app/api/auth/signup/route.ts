@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import { z } from 'zod';
-import { findUserByEmail, createUser, createSession, setSessionCookie } from '@/lib/auth/session';
+import {
+  findUserByEmail,
+  createUser,
+  createSession,
+  COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+} from '@/lib/auth/session';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -33,13 +39,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await bcryptjs.hash(password, 12);
     const user = await createUser(email, passwordHash);
 
     const token = await createSession(user.id);
-    await setSessionCookie(token);
 
-    return NextResponse.json({ success: true, userId: user.id });
+    // Set cookie on the response object — the only reliable pattern in Route Handlers
+    const response = NextResponse.json({ success: true, userId: user.id });
+    response.cookies.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: SESSION_MAX_AGE_SECONDS,
+      path: '/',
+    });
+    return response;
   } catch (err) {
     console.error('[Auth/Signup]', err);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });

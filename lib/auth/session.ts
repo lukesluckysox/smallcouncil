@@ -3,8 +3,9 @@ import crypto from 'crypto';
 import { query, queryOne } from '@/lib/db';
 import type { AuthUser, DbUser } from '@/lib/types';
 
-const COOKIE_NAME = 'sc_session';
-const SESSION_DURATION_DAYS = 30;
+export const COOKIE_NAME = 'sc_session';
+export const SESSION_DURATION_DAYS = 30;
+export const SESSION_MAX_AGE_SECONDS = SESSION_DURATION_DAYS * 24 * 60 * 60;
 
 // ─── Token Generation ─────────────────────────────────────────────────────────
 
@@ -12,13 +13,11 @@ export function generateToken(): string {
   return crypto.randomBytes(48).toString('hex');
 }
 
-// ─── Create Session ───────────────────────────────────────────────────────────
+// ─── Create Session (DB only — caller sets the cookie) ────────────────────────
 
 export async function createSession(userId: string): Promise<string> {
   const token = generateToken();
-  const expiresAt = new Date(
-    Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000
-  );
+  const expiresAt = new Date(Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000);
 
   await query(
     `INSERT INTO auth_sessions (user_id, token, expires_at)
@@ -29,20 +28,7 @@ export async function createSession(userId: string): Promise<string> {
   return token;
 }
 
-// ─── Set Cookie ───────────────────────────────────────────────────────────────
-
-export async function setSessionCookie(token: string): Promise<void> {
-  const cookieStore = cookies();
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: SESSION_DURATION_DAYS * 24 * 60 * 60,
-    path: '/',
-  });
-}
-
-// ─── Get Current User ─────────────────────────────────────────────────────────
+// ─── Get Current User (reads cookie — safe in Route Handlers) ─────────────────
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const cookieStore = cookies();
@@ -59,7 +45,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
   if (!row) return null;
   if (new Date(row.expires_at) < new Date()) {
-    // Expired — clean up lazily
+    // Expired — clean up lazily (no cookie write needed)
     await query(`DELETE FROM auth_sessions WHERE token = $1`, [token]);
     return null;
   }
@@ -67,27 +53,26 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   return { id: row.user_id, email: row.email };
 }
 
-// ─── Get Token From Cookie ────────────────────────────────────────────────────
+// ─── Get Session Token (reads cookie — safe in Route Handlers) ────────────────
 
 export function getSessionToken(): string | null {
   const cookieStore = cookies();
   return cookieStore.get(COOKIE_NAME)?.value ?? null;
 }
 
-// ─── Destroy Session ──────────────────────────────────────────────────────────
+// ─── Destroy Session (DB only — caller deletes the cookie via NextResponse) ───
 
 export async function destroySession(): Promise<void> {
   const cookieStore = cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
-
   if (token) {
     await query(`DELETE FROM auth_sessions WHERE token = $1`, [token]);
   }
-
-  cookieStore.delete(COOKIE_NAME);
+  // NOTE: do NOT call cookieStore.delete() here — unreliable in Route Handlers.
+  // The logout route handler sets the cookie to expired via response.cookies.
 }
 
-// ─── Require Auth (throws-on-fail helper for route handlers) ──────────────────
+// ─── Require Auth ─────────────────────────────────────────────────────────────
 
 export async function requireUser(): Promise<AuthUser> {
   const user = await getCurrentUser();
