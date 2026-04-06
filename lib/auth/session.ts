@@ -97,11 +97,13 @@ export async function createUser(
 ): Promise<DbUser> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  const rows = await query<DbUser>(
+  // INSERT then SELECT — avoids relying on RETURNING * with better-sqlite3
+  await query(
     `INSERT INTO users (id, email, password_hash, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)
-     RETURNING *`,
+     VALUES (?, ?, ?, ?, ?)`,
     [id, email.toLowerCase().trim(), passwordHash, now, now]
   );
-  return rows[0];
+  const user = await queryOne<DbUser>(`SELECT * FROM users WHERE id = ?`, [id]);
+  if (!user) throw new Error('User creation failed — SELECT after INSERT returned nothing');
+  return user;
 }
