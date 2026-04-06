@@ -14,7 +14,7 @@ import type {
   CouncilResult,
 } from '@/lib/types';
 
-const MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';
+const MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-20250514';
 const MAX_TOKENS = 1200;
 const TIMEOUT_MS = 45_000;
 
