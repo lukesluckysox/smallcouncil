@@ -16,12 +16,13 @@ import type {
 
 const MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';
 const MAX_TOKENS = 1200;
-const TIMEOUT_MS = 45000;
+const TIMEOUT_MS = 45_000;
 
 function getClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
-  return new Anthropic({ apiKey });
+  // Pass timeout at the client level — avoids AbortController compat issues
+  return new Anthropic({ apiKey, timeout: TIMEOUT_MS });
 }
 
 // ─── Parsers ──────────────────────────────────────────────────────────────────
@@ -94,31 +95,24 @@ async function callPersona(
   personaId: PersonaId,
   userPrompt: string
 ): Promise<{ personaId: PersonaId; content: string }> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
   try {
-    const message = await client.messages.create(
-      {
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPTS[personaId],
-        messages: [{ role: 'user', content: userPrompt }],
-      },
-      { signal: controller.signal }
-    );
+    const message = await client.messages.create({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM_PROMPTS[personaId],
+      messages: [{ role: 'user', content: userPrompt }],
+    });
 
     const content =
       message.content[0].type === 'text' ? message.content[0].text : '';
     return { personaId, content };
   } catch (err) {
-    console.error(`[Council] ${personaId} failed:`, err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[Council] ${personaId} failed: ${errorMsg}`);
     return {
       personaId,
-      content: `STANCE: Unable to convene\nCONFIDENCE: 1\n\nRESPONSE:\nThis voice could not speak at this time. The council acknowledges the silence.\n\nACTIONS:\n1. Revisit this dilemma when the council is fully present\n2. Consider what this silence itself might mean\n\nWARNING:\nA council without full representation is incomplete.`,
+      content: `STANCE: Unable to convene\nCONFIDENCE: 1\n\nRESPONSE:\nThis voice could not speak. Error: ${errorMsg}\n\nACTIONS:\n1. Revisit this dilemma when the council is fully present\n2. Consider what this silence itself might mean\n\nWARNING:\nA council without full representation is incomplete.`,
     };
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -229,26 +223,19 @@ Write the Council Summary — 200-300 words:
 
 Do not recap individual stances. Synthesize across the whole record.`;
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
   try {
-    const message = await client.messages.create(
-      {
-        model: MODEL,
-        max_tokens: 800,
-        system: NEUTRAL_SYSTEM,
-        messages: [{ role: 'user', content: userPrompt }],
-      },
-      { signal: controller.signal }
-    );
+    const message = await client.messages.create({
+      model: MODEL,
+      max_tokens: 800,
+      system: NEUTRAL_SYSTEM,
+      messages: [{ role: 'user', content: userPrompt }],
+    });
     const content = message.content[0].type === 'text' ? message.content[0].text : '';
     return content || 'The council deliberated. The record stands.';
   } catch (err) {
-    console.error('[Council] Summary generation failed:', err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[Council] Summary generation failed: ${errorMsg}`);
     return 'The council deliberated, but the scribe could not complete the record at this time.';
-  } finally {
-    clearTimeout(timer);
   }
 }
 
