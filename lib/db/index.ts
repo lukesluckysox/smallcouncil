@@ -1,47 +1,53 @@
-import { Pool } from 'pg';
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
-// Singleton pool — reused across requests in the same Node.js process
-let pool: Pool | null = null;
+// ─── DB Path ───────────────────────────────────────────────────────────────────
+// Railway: set DATABASE_PATH=/data/smallcouncil.db (volume mounted at /data)
+// Local dev: falls back to <project>/data/smallcouncil.db
 
-export function getPool(): Pool {
-  if (!pool) {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) {
-      throw new Error('DATABASE_URL environment variable is not set');
-    }
-    pool = new Pool({
-      connectionString,
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : false,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
+const DB_FILE =
+  process.env.DATABASE_PATH ??
+  path.join(process.cwd(), 'data', 'smallcouncil.db');
 
-    pool.on('error', (err) => {
-      console.error('Unexpected DB pool error', err);
-    });
+// Ensure the directory exists before opening (needed on first boot)
+const dbDir = path.dirname(DB_FILE);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+// ─── Singleton ────────────────────────────────────────────────────────────────
+
+let _db: Database.Database | null = null;
+
+function getDb(): Database.Database {
+  if (!_db) {
+    _db = new Database(DB_FILE);
+    // WAL mode: concurrent reads don't block writes
+    _db.pragma('journal_mode = WAL');
+    // Enforce foreign-key constraints
+    _db.pragma('foreign_keys = ON');
   }
-  return pool;
+  return _db;
 }
 
-// Convenience: run a parameterized query
-export async function query<T = Record<string, unknown>>(
-  text: string,
-  params?: unknown[]
-): Promise<T[]> {
-  const db = getPool();
-  const result = await db.query(text, params);
-  return result.rows as T[];
+// ─── Query Helpers ─────────────────────────────────────────────────────────────
+// Async wrappers keep the calling code unchanged.
+// Use ? placeholders in all SQL (not $1/$2 — that is PostgreSQL syntax).
+// INSERT ... RETURNING * works via .all() with better-sqlite3 / SQLite 3.35+.
+
+export async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return getDb().prepare(sql).all(...(params as any[])) as T[];
 }
 
-// Convenience: run a query and return first row or null
-export async function queryOne<T = Record<string, unknown>>(
-  text: string,
-  params?: unknown[]
-): Promise<T | null> {
-  const rows = await query<T>(text, params);
+export async function queryOne<T>(sql: string, params: unknown[] = []): Promise<T | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = getDb().prepare(sql).all(...(params as any[])) as T[];
   return rows[0] ?? null;
+}
+
+// Exposed for instrumentation.ts schema init
+export function getDbInstance(): Database.Database {
+  return getDb();
 }

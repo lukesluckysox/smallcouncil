@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 
   const session = await queryOne<DbSession>(
-    `SELECT * FROM sessions WHERE id = $1 AND user_id = $2`,
+    `SELECT * FROM sessions WHERE id = ? AND user_id = ?`,
     [params.sessionId, user.id]
   );
 
@@ -27,12 +27,18 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Session not found' }, { status: 404 });
   }
 
-  const turns = await query<DbCouncilTurn>(
+  const rawTurns = await query<DbCouncilTurn & { actions: string | null }>(
     `SELECT * FROM council_turns
-     WHERE session_id = $1
+     WHERE session_id = ?
      ORDER BY round_number ASC, created_at ASC`,
     [params.sessionId]
   );
+
+  // SQLite stores actions as JSON text — parse back to arrays
+  const turns: DbCouncilTurn[] = rawTurns.map((t) => ({
+    ...t,
+    actions: t.actions ? (JSON.parse(t.actions) as string[]) : null,
+  }));
 
   return NextResponse.json({ session, turns });
 }
@@ -55,7 +61,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   // Verify ownership
   const session = await queryOne<{ id: string }>(
-    `SELECT id FROM sessions WHERE id = $1 AND user_id = $2`,
+    `SELECT id FROM sessions WHERE id = ? AND user_id = ?`,
     [params.sessionId, user.id]
   );
 
@@ -81,18 +87,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const updates = parsed.data;
   const setClauses: string[] = [];
   const values: unknown[] = [];
-  let idx = 1;
 
+  // SQLite uses ? placeholders — no $1/$2 indexing needed
   if (updates.title !== undefined) {
-    setClauses.push(`title = $${idx++}`);
+    setClauses.push('title = ?');
     values.push(updates.title);
   }
   if (updates.ruling !== undefined) {
-    setClauses.push(`ruling = $${idx++}`);
+    setClauses.push('ruling = ?');
     values.push(updates.ruling);
   }
   if (updates.status !== undefined) {
-    setClauses.push(`status = $${idx++}`);
+    setClauses.push('status = ?');
     values.push(updates.status);
   }
 
@@ -103,7 +109,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   values.push(params.sessionId);
 
   await query(
-    `UPDATE sessions SET ${setClauses.join(', ')} WHERE id = $${idx}`,
+    `UPDATE sessions SET ${setClauses.join(', ')} WHERE id = ?`,
     values
   );
 

@@ -1,19 +1,17 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Small Council — Database Schema
--- Run with: psql $DATABASE_URL -f sql/schema.sql
+-- Small Council — SQLite Schema
+-- Runs automatically via instrumentation.ts on every server start.
+-- All statements use IF NOT EXISTS / CREATE OR REPLACE — fully idempotent.
 -- ─────────────────────────────────────────────────────────────────────────────
-
--- Enable UUID generation
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ─── Users ───────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS users (
-  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  email       TEXT        UNIQUE NOT NULL,
-  password_hash TEXT      NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id            TEXT PRIMARY KEY,
+  email         TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
@@ -21,11 +19,11 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 -- ─── Auth Sessions ────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS auth_sessions (
-  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  token       TEXT        UNIQUE NOT NULL,
-  expires_at  TIMESTAMPTZ NOT NULL,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token       TEXT UNIQUE NOT NULL,
+  expires_at  TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_auth_sessions_token   ON auth_sessions (token);
@@ -34,15 +32,15 @@ CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id ON auth_sessions (user_id);
 -- ─── Council Sessions ─────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS sessions (
-  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id          UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title            TEXT,
-  dilemma          TEXT        NOT NULL,
-  council_summary  TEXT,
-  ruling           TEXT,
-  status           TEXT        NOT NULL DEFAULT 'active',
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id              TEXT PRIMARY KEY,
+  user_id         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title           TEXT,
+  dilemma         TEXT NOT NULL,
+  council_summary TEXT,
+  ruling          TEXT,
+  status          TEXT NOT NULL DEFAULT 'active',
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id_created
@@ -51,36 +49,36 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user_id_created
 -- ─── Council Turns ────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS council_turns (
-  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id       UUID        NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  persona_id       TEXT        NOT NULL,
-  round_number     INTEGER     NOT NULL,
+  id                TEXT PRIMARY KEY,
+  session_id        TEXT    NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  persona_id        TEXT    NOT NULL,
+  round_number      INTEGER NOT NULL,
   target_persona_id TEXT,
-  stance_title     TEXT,
-  content          TEXT        NOT NULL,
-  confidence       INTEGER,
-  actions          JSONB,
-  warning          TEXT,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  stance_title      TEXT,
+  content           TEXT    NOT NULL,
+  confidence        INTEGER,
+  actions           TEXT,   -- JSON array stored as text
+  warning           TEXT,
+  created_at        TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_council_turns_session_round
   ON council_turns (session_id, round_number);
 
--- ─── Updated-at Trigger ───────────────────────────────────────────────────────
+-- ─── Updated-at Triggers ──────────────────────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
+CREATE TRIGGER IF NOT EXISTS users_updated_at
+  AFTER UPDATE ON users
+  FOR EACH ROW
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
+  UPDATE users SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+  WHERE id = NEW.id;
 END;
-$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER users_updated_at
-  BEFORE UPDATE ON users
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE OR REPLACE TRIGGER sessions_updated_at
-  BEFORE UPDATE ON sessions
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER IF NOT EXISTS sessions_updated_at
+  AFTER UPDATE ON sessions
+  FOR EACH ROW
+BEGIN
+  UPDATE sessions SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+  WHERE id = NEW.id;
+END;

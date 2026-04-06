@@ -2,12 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    // pg uses native bindings — keep it external to avoid bundling issues
-    serverComponentsExternalPackages: ['pg'],
-    // Enable instrumentation.ts for Railway auto-migration on startup
+    // Keep native module out of the webpack bundle
+    serverComponentsExternalPackages: ['better-sqlite3'],
+    // Enable instrumentation.ts for SQLite schema init on startup
     instrumentationHook: true,
   },
-  // Railway sets PORT automatically; Next.js respects it via --port or $PORT
 };
 
 export default nextConfig;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import crypto from 'crypto';
 import { requireUser } from '@/lib/auth/session';
 import { runCouncil } from '@/lib/council/orchestrator';
 import { query } from '@/lib/db';
@@ -53,28 +54,24 @@ export async function POST(request: NextRequest) {
 
   // Persist to DB
   try {
-    // Create the session row
-    const sessionRows = await query<{ id: string }>(
-      `INSERT INTO sessions (user_id, title, dilemma, council_summary, status)
-       VALUES ($1, $2, $3, $4, 'active')
-       RETURNING id`,
-      [
-        user.id,
-        title ?? null,
-        dilemma,
-        result.summary,
-      ]
+    const sessionId = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    await query(
+      `INSERT INTO sessions (id, user_id, title, dilemma, council_summary, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+      [sessionId, user.id, title ?? null, dilemma, result.summary, now, now]
     );
-    const sessionId = sessionRows[0].id;
 
     // Insert Round 1 turns
     for (const turn of result.round1) {
       await query(
         `INSERT INTO council_turns
-           (session_id, persona_id, round_number, stance_title, content,
-            confidence, actions, warning)
-         VALUES ($1, $2, 1, $3, $4, $5, $6, $7)`,
+           (id, session_id, persona_id, round_number, stance_title, content,
+            confidence, actions, warning, created_at)
+         VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?)`,
         [
+          crypto.randomUUID(),
           sessionId,
           turn.personaId,
           turn.stanceTitle,
@@ -82,6 +79,7 @@ export async function POST(request: NextRequest) {
           turn.confidence,
           JSON.stringify(turn.actions),
           turn.warning,
+          now,
         ]
       );
     }
@@ -90,15 +88,17 @@ export async function POST(request: NextRequest) {
     for (const turn of result.round2) {
       await query(
         `INSERT INTO council_turns
-           (session_id, persona_id, round_number, target_persona_id,
-            content, actions)
-         VALUES ($1, $2, 2, $3, $4, $5)`,
+           (id, session_id, persona_id, round_number, target_persona_id,
+            content, actions, created_at)
+         VALUES (?, ?, ?, 2, ?, ?, ?, ?)`,
         [
+          crypto.randomUUID(),
           sessionId,
           turn.personaId,
           turn.targetPersonaId,
           turn.content,
           JSON.stringify([turn.recommendation]),
+          now,
         ]
       );
     }

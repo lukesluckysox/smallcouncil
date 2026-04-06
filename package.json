@@ -13,8 +13,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
     "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.8.0",
     "next": "^14.2.35",
-    "pg": "^8.13.3",
     "react": "^18",
     "react-dom": "^18",
     "uuid": "^9.0.1",
@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
-    "@types/pg": "^8.11.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
