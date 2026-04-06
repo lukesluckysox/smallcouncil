@@ -1,0 +1,180 @@
+.chamber {
+  margin-top: 40px;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 40px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 12px 20px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-secondary);
+}
+
+.tabActive {
+  color: var(--text-accent);
+  border-bottom-color: var(--gold);
+}
+
+/* ─── Section ────────────────────────────────────────────────────────────────── */
+
+.section {
+  animation: fadeIn 0.3s ease;
+}
+
+.sectionNote {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+
+.emptyNote {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ─── Voice Grid ─────────────────────────────────────────────────────────────── */
+
+.voiceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ─── Summary ────────────────────────────────────────────────────────────────── */
+
+.summaryBlock {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-emphasis);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  max-width: 780px;
+  box-shadow: var(--shadow-gold);
+}
+
+.summaryLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.summaryText {
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+/* ─── Ruling Section ─────────────────────────────────────────────────────────── */
+
+.rulingSection {
+  margin-top: 72px;
+  padding-top: 56px;
+  border-top: 1px solid var(--border-emphasis);
+}
+
+.rulingOrnamentText {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rulingForm {
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rulingField {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rulingLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rulingForm textarea {
+  resize: vertical;
+  min-height: 140px;
+  font-family: var(--font-dramatic);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  font-style: italic;
+}
+
+.rulingFooter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.saveBtn {
+  padding: 12px 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-emphasis);
+  color: var(--text-accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--bg-raised);
+  box-shadow: 0 0 16px rgba(184, 134, 11, 0.15);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.savedConfirm {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-muted);
+  animation: fadeIn 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .voiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    gap: 0;
+  }
+
+  .tab {
+    padding: 10px 14px;
+    font-size: 0.65rem;
+  }
+}

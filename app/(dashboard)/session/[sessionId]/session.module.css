@@ -1,0 +1,49 @@
+.page {
+  padding-top: 48px;
+  padding-bottom: 80px;
+}
+
+.sessionHeader {
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sessionTitle {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.dilemmaBlock {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+
+.dilemmaLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.dilemmaText {
+  font-family: var(--font-dramatic);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}

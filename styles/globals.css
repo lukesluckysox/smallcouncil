@@ -1,0 +1,317 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Small Council — Global Styles
+   Dark medieval / council chamber aesthetic
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-void: #080808;
+  --bg-base: #0e0d0b;
+  --bg-surface: #141210;
+  --bg-elevated: #1c1917;
+  --bg-raised: #242019;
+  --bg-overlay: rgba(14, 13, 11, 0.92);
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-mid: rgba(255, 255, 255, 0.1);
+  --border-emphasis: rgba(184, 134, 11, 0.25);
+
+  /* Text */
+  --text-primary: #e8e4dc;
+  --text-secondary: #a09888;
+  --text-muted: #5a524a;
+  --text-accent: #c8a84b;
+
+  /* Gold accent */
+  --gold: #b8860b;
+  --gold-light: #d4ac0d;
+  --gold-dim: rgba(184, 134, 11, 0.15);
+
+  /* Persona colors */
+  --instinct: #C0392B;
+  --instinct-bg: rgba(139, 26, 26, 0.12);
+  --instinct-border: rgba(192, 57, 43, 0.3);
+
+  --critic: #2E6DA4;
+  --critic-bg: rgba(26, 46, 90, 0.15);
+  --critic-border: rgba(46, 109, 164, 0.3);
+
+  --realist: #2E7D52;
+  --realist-bg: rgba(26, 46, 32, 0.15);
+  --realist-border: rgba(46, 125, 82, 0.3);
+
+  --shadow: #7B2D8B;
+  --shadow-bg: rgba(43, 26, 64, 0.15);
+  --shadow-border: rgba(123, 45, 139, 0.3);
+
+  --sage: #B8860B;
+  --sage-bg: rgba(46, 34, 0, 0.2);
+  --sage-border: rgba(184, 134, 11, 0.3);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 20px rgba(184, 134, 11, 0.12);
+
+  /* Typography */
+  --font-display: 'Cinzel', 'Georgia', serif;
+  --font-dramatic: 'Cormorant Garamond', 'Georgia', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-mid: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ─── Reset ─────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+img, video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────────── */
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+}
+
+.font-dramatic {
+  font-family: var(--font-dramatic);
+}
+
+.text-gold {
+  color: var(--text-accent);
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ─── Selection ─────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: rgba(184, 134, 11, 0.25);
+  color: var(--text-primary);
+}
+
+/* ─── Prose Styling (for council responses) ─────────────────────────────────── */
+
+.prose {
+  font-family: var(--font-dramatic);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+
+.prose p {
+  margin-bottom: 1em;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Focus Ring ─────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ─── Form Elements ──────────────────────────────────────────────────────────── */
+
+textarea, input[type="email"], input[type="password"], input[type="text"] {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+textarea:focus, input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+}
+
+textarea::placeholder, input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────────── */
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--space-xl) 0;
+}
+
+.divider-gold {
+  border-top-color: var(--border-emphasis);
+}
+
+/* ─── Page Container ─────────────────────────────────────────────────────────── */
+
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* ─── Ceremonial Ornament ────────────────────────────────────────────────────── */
+
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  color: var(--text-muted);
+}
+
+.ornament::before,
+.ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--border-emphasis),
+    transparent
+  );
+}
+
+/* ─── Animation Utilities ────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ─── Loading Skeleton ───────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--bg-raised) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  html { font-size: 15px; }
+  .page-container { padding: 0 var(--space-md); }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 14px; }
+}

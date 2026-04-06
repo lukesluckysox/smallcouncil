@@ -1,0 +1,33 @@
+.page {
+  padding-top: 60px;
+  padding-bottom: 80px;
+  max-width: 760px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.body {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}

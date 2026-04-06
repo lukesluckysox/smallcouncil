@@ -1,0 +1,122 @@
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-mid);
+  box-shadow: var(--shadow-sm);
+}
+
+.itemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemTitle {
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archivedBadge {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.itemPreview {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.itemDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.itemTurns {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.itemArrow {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  opacity: 0.4;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.item:hover .itemArrow {
+  opacity: 1;
+  transform: translateX(3px);
+  color: var(--text-accent);
+}
+
+@media (max-width: 600px) {
+  .item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .itemMeta {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .itemArrow {
+    display: none;
+  }
+}

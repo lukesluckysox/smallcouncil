@@ -1,0 +1,65 @@
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(ellipse 50% 50% at 50% 0%, rgba(184, 134, 11, 0.06) 0%, transparent 70%),
+    var(--bg-base);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
+}
+
+.top {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.wordmark {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--text-accent);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.heading {
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.subheading {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.switchPrompt {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.switchLink {
+  color: var(--text-accent);
+  transition: color var(--transition-fast);
+}
+
+.switchLink:hover {
+  color: var(--gold-light);
+  text-decoration: underline;
+}
